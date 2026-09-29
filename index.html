@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiation Dose Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        .authors {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .authors strong {
+            color: #fff;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.02);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff4757, #cc0000);
+        }
+        
+        .records {
+            margin-top: 20px;
+        }
+        
+        .record {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .record .dose {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .total {
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .total span {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .limits {
+            margin-top: 15px;
+        }
+        
+        .limit-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+        
+        .limit-row .ok {
+            color: #2ed573;
+        }
+        
+        .limit-row .exceeded {
+            color: #ff4757;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☢️ RADIATION DOSE TRACKER</h1>
+            <div class="authors">
+                <strong>Mikheil Jorbenadze, PhD</strong><br>
+                ORCID: 0009-0004-3914-1959<br>
+                <em>GPT-4 — AI Assistant</em>
+            </div>
+        </header>
+        
+        <div class="card">
+            <h2>➕ Add Measurement</h2>
+            
+            <div class="input-group">
+                <label>Dose Rate (mSv/hour)</label>
+                <input type="number" id="doseRate" step="0.01" placeholder="0.5">
+            </div>
+            
+            <div class="input-group">
+                <label>Hours</label>
+                <input type="number" id="hours" step="0.1" placeholder="8">
+            </div>
+            
+            <div class="input-group">
+                <label>Location</label>
+                <input type="text" id="location" placeholder="Asphalt, building...">
+            </div>
+            
+            <button onclick="addRecord()">➕ ADD</button>
+        </div>
+        
+        <div class="card">
+            <h2>📋 Records</h2>
+            <div class="records" id="recordsList">
+                <p style="color: #666;">No records</p>
+            </div>
+            
+            <div class="total">
+                Total Dose: <span id="totalDose">0</span> mSv
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>⚖️ Limits</h2>
+            <div class="limits" id="limitsList"></div>
+        </div>
+        
+        <div class="card">
+            <button class="danger" onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // RADIATION DOSE TRACKER — JavaScript
+        // Author: Mikheil Jorbenadze, PhD
+        // GPT-4 — AI Assistant
+        // ============================================
+        
+        let records = JSON.parse(localStorage.getItem('doseRecords') || '[]');
+        
+        function addRecord() {
+            const doseRate = parseFloat(document.getElementById('doseRate').value);
+            const hours = parseFloat(document.getElementById('hours').value);
+            const location = document.getElementById('location').value || 'Not specified';
+            
+            if (isNaN(doseRate) || isNaN(hours)) {
+                alert('Please enter valid numbers');
+                return;
+            }
+            
+            const dose = doseRate * hours;
+            
+            records.push({
+                date: new Date().toISOString().slice(0, 10),
+                doseRate: doseRate,
+                hours: hours,
+                dose: dose,
+                location: location
+            });
+            
+            saveRecords();
+            render();
+            
+            document.getElementById('doseRate').value = '';
+            document.getElementById('hours').value = '';
+            document.getElementById('location').value = '';
+        }
+        
+        function saveRecords() {
+            localStorage.setItem('doseRecords', JSON.stringify(records));
+        }
+        
+        function clearAll() {
+            if (confirm('Clear all records?')) {
+                records = [];
+                saveRecords();
+                render();
+            }
+        }
+        
+        function render() {
+            const recordsList = document.getElementById('recordsList');
+            
+            if (records.length === 0) {
+                recordsList.innerHTML = '<p style="color: #666;">No records</p>';
+                document.getElementById('totalDose').textContent = '0';
+                renderLimits(0);
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            records.forEach(r => {
+                total += r.dose;
+                html += `
+                    <div class="record">
+                        <span>${r.date} — ${r.location}</span>
+                        <span class="dose">${r.dose.toFixed(2)} mSv</span>
+                    </div>
+                `;
+            });
+            
+            recordsList.innerHTML = html;
+            document.getElementById('totalDose').textContent = total.toFixed(2);
+            renderLimits(total);
+        }
+        
+        function renderLimits(total) {
+            const limits = [
+                { name: 'ICRP (20 mSv)', value: 20 },
+                { name: 'US NRC (50 mSv)', value: 50 },
+                { name: 'Lens US (150 mSv)', value: 150 },
+                { name: 'Lens ICRP (20 mSv)', value: 20 }
+            ];
+            
+            let html = '';
+            limits.forEach(l => {
+                const percent = ((total / l.value) * 100).toFixed(1);
+                const status = total < l.value ? 'ok' : 'exceeded';
+                const symbol = total < l.value ? '✅' : '❌';
+                
+                html += `
+                    <div class="limit-row">
+                        <span>${l.name}</span>
+                        <span class="${status}">${total.toFixed(2)}/${l.value} mSv (${percent}%) ${symbol}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('limitsList').innerHTML = html;
+        }
+        
+        // Initialize
+        render();
+    </script>
+</body>
+</html>
