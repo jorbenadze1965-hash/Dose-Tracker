@@ -1,166 +1,325 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#10243a">
-<title>Radiation Dose Tracker — журнал измерений</title>
-<meta name="description" content="Журнал измерений мощности дозы и расчётной накопленной дозы. Данные сохраняются локально в браузере.">
-<style>
-:root{color-scheme:dark;--bg:#0b1422;--panel:#111f31;--panel2:#17283d;--line:#2a3d53;--text:#edf4fb;--muted:#a6b7c9;--accent:#55d6c2;--accent2:#73a9ff;--danger:#ff7d88;--radius:18px}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#17334c 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
-button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #73a9ff;outline-offset:2px}
-.wrap{width:min(1120px,calc(100% - 32px));margin:auto;padding:30px 0 44px}
-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:14px}.logo{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#1b786f,#245b87);font-size:25px}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(23px,4vw,34px);line-height:1.15;margin:3px 0}header p,.muted{color:var(--muted);margin:5px 0 0}.privacy{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--accent);font-size:13px;white-space:nowrap}
-.grid{display:grid;grid-template-columns: minmax(0,1.05fr) minmax(0,1fr);gap:18px}.card{background:linear-gradient(180deg,rgba(23,40,61,.96),rgba(17,31,49,.96));border:1px solid var(--line);border-radius:var(--radius);padding:22px;min-width:0;box-shadow:0 12px 34px #00000018}.card h2{font-size:18px;margin:0 0 16px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:13px;color:var(--muted)}input,select{width:100%;border:1px solid #3b5068;border-radius:11px;background:#0d1a29;color:var(--text);padding:12px 13px;min-height:46px}input::placeholder{color:#6f8296}.help{font-size:12px;color:var(--muted);margin-top:4px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}.btn{border:1px solid #3a5067;background:#20344a;color:var(--text);padding:10px 14px;border-radius:11px;font-weight:700}.btn.primary{background:var(--accent);border-color:var(--accent);color:#08211f}.btn.secondary{background:transparent}.btn.danger{color:#ffb0b7;border-color:#81444e;background:#351e2a}.btn:disabled{opacity:.45;cursor:not-allowed}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}.stat{background:#0d1a29;border:1px solid var(--line);padding:16px;border-radius:14px}.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:clamp(23px,3vw,30px);font-weight:800;letter-spacing:-.03em;overflow-wrap:anywhere}.stat-value small{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}.section-head h2{margin:0}.filters{display:flex;gap:8px;margin:14px 0}.filters input{min-width:0}.records{display:flex;flex-direction:column;gap:10px}.record{border:1px solid var(--line);background:#0d1a29;border-radius:13px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}.record-title{font-weight:750;overflow-wrap:anywhere}.record-meta{font-size:12px;color:var(--muted);margin-top:4px}.record-dose{font-weight:800;color:var(--accent);white-space:nowrap}.record-actions{display:flex;gap:6px;grid-column:1/-1}.record-actions .btn{padding:6px 10px;font-size:12px}.empty{border:1px dashed #40546b;border-radius:13px;padding:24px;text-align:center;color:var(--muted)}
-.chart-wrap{height:250px;position:relative;margin-top:8px}canvas{width:100%;height:100%;display:block}.notice{border:1px solid #66552f;background:#2b261a;color:#f0dba7;border-radius:13px;padding:14px;font-size:13px}.foot{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}.wide{grid-column:1/-1}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}header{align-items:flex-start;flex-direction:column}.privacy{white-space:normal}.card{padding:17px}.wrap{width:min(100% - 22px,600px);padding-top:20px}.form-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:420px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.stats{gap:8px}.stat{padding:12px}.record{grid-template-columns:1fr}.record-dose{white-space:normal}.record-actions{grid-column:auto}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiation Dose Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        .authors {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .authors strong {
+            color: #fff;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.02);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff4757, #cc0000);
+        }
+        
+        .records {
+            margin-top: 20px;
+        }
+        
+        .record {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .record .dose {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .total {
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .total span {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .limits {
+            margin-top: 15px;
+        }
+        
+        .limit-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+        
+        .limit-row .ok {
+            color: #2ed573;
+        }
+        
+        .limit-row .exceeded {
+            color: #ff4757;
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-<header>
-  <div class="brand"><div class="logo" aria-hidden="true">☢</div><div><div class="eyebrow">Personal monitoring</div><h1>Radiation Dose Tracker</h1><p>Журнал измерений и расчётной накопленной дозы</p></div></div>
-  <div class="privacy">● Данные хранятся в этом браузере</div>
-</header>
-
-<main class="grid">
-<section class="card">
-  <h2 id="formTitle">＋ Добавить измерение</h2>
-  <form id="recordForm">
-    <div class="form-grid">
-      <div class="field"><label for="doseRate">Мощность дозы</label><input id="doseRate" name="doseRate" type="number" min="0" step="any" placeholder="Например, 0,5" required><div class="help">Значение не может быть отрицательным</div></div>
-      <div class="field"><label for="unit">Единица мощности</label><select id="unit" name="unit"><option value="mSv">мЗв/ч</option><option value="uSv">мкЗв/ч</option></select></div>
-      <div class="field"><label for="hours">Продолжительность (ч)</label><input id="hours" name="hours" type="number" min="0.000001" step="any" placeholder="Например, 8" required></div>
-      <div class="field"><label for="date">Дата измерения</label><input id="date" name="date" type="date" required></div>
-      <div class="field full"><label for="location">Место / контрольная точка</label><input id="location" name="location" maxlength="180" placeholder="Например, лаборатория или точка A"></div>
-      <div class="field full"><label for="notes">Примечания (необязательно)</label><input id="notes" name="notes" maxlength="500" placeholder="Прибор, условия измерения, наблюдения"></div>
+    <div class="container">
+        <header>
+            <h1>☢️ RADIATION DOSE TRACKER</h1>
+            <div class="authors">
+                <strong>Mikheil Jorbenadze, PhD</strong><br>
+                ORCID: 0009-0004-3914-1959<br>
+                <em>GPT-4 — AI Assistant</em>
+            </div>
+        </header>
+        
+        <div class="card">
+            <h2>➕ Add Measurement</h2>
+            
+            <div class="input-group">
+                <label>Dose Rate (mSv/hour)</label>
+                <input type="number" id="doseRate" step="0.01" placeholder="0.5">
+            </div>
+            
+            <div class="input-group">
+                <label>Hours</label>
+                <input type="number" id="hours" step="0.1" placeholder="8">
+            </div>
+            
+            <div class="input-group">
+                <label>Location</label>
+                <input type="text" id="location" placeholder="Asphalt, building...">
+            </div>
+            
+            <button onclick="addRecord()">➕ ADD</button>
+        </div>
+        
+        <div class="card">
+            <h2>📋 Records</h2>
+            <div class="records" id="recordsList">
+                <p style="color: #666;">No records</p>
+            </div>
+            
+            <div class="total">
+                Total Dose: <span id="totalDose">0</span> mSv
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>⚖️ Limits</h2>
+            <div class="limits" id="limitsList"></div>
+        </div>
+        
+        <div class="card">
+            <button class="danger" onclick="clearAll()">🗑️ Clear All</button>
+        </div>
     </div>
-    <div class="actions"><button class="btn primary" type="submit" id="submitBtn">Сохранить запись</button><button class="btn secondary" type="button" id="cancelEdit" hidden>Отменить редактирование</button></div>
-  </form>
-</section>
 
-<section class="card">
-  <h2>Обзор</h2>
-  <div class="stats">
-    <div class="stat"><div class="stat-label">Сумма расчётных доз</div><div class="stat-value" id="totalDose">0</div><div class="muted">мЗв</div></div>
-    <div class="stat"><div class="stat-label">Записей</div><div class="stat-value" id="recordCount">0</div><div class="muted">в журнале</div></div>
-  </div>
-  <div class="notice">Расчётная доза = мощность дозы × время. Это оценка по введённым данным, а не подтверждённая индивидуальная доза или медицинское заключение.</div>
-  <div class="section-head" style="margin-top:20px"><h2>Динамика по записям</h2></div>
-  <div class="chart-wrap"><canvas id="doseChart" role="img" aria-label="График расчётных доз по записям"></canvas></div>
-  <div class="help">На графике показана расчётная доза каждой записи, а не показания дозиметра в реальном времени.</div>
-</section>
-
-<section class="card wide">
-  <div class="section-head"><h2>История измерений</h2><span class="muted" id="visibleCount">0 записей</span></div>
-  <div class="filters"><input id="search" type="search" placeholder="Поиск по месту или примечанию" aria-label="Поиск по журналу"><button class="btn secondary" type="button" id="exportCsv">Экспорт CSV</button></div>
-  <div class="records" id="recordsList"><div class="empty">Пока нет записей. Добавьте первое измерение выше.</div></div>
-  <div class="actions"><button class="btn secondary" type="button" id="exportJson">Резервная копия JSON</button><button class="btn danger" type="button" id="clearAll">Удалить все записи</button></div>
-</section>
-
-<section class="card wide">
-  <h2>О пределах доз</h2>
-  <p class="muted">Нормативные пределы зависят от категории человека, типа облучения, периода усреднения и национальных правил. Не используйте универсальную шкалу «безопасно / опасно» для медицинских решений. При профессиональном облучении сверяйтесь с действующими нормами вашей юрисдикции и специалистом по радиационной защите.</p>
-</section>
-</main>
-<footer class="foot">Radiation Dose Tracker · Локальный журнал в браузере · Перед очисткой или сменой устройства экспортируйте резервную копию.</footer>
-</div>
-<script>
-(() => {
-  "use strict";
-  const STORAGE_KEY = "doseRecords";
-  const $ = id => document.getElementById(id);
-  let records = [];
-  let editingId = null;
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    records = Array.isArray(stored) ? stored.filter(r =>
-      r && typeof r === "object" && Number.isFinite(Number(r.dose)) &&
-      Number(r.dose) >= 0 && Number.isFinite(Number(r.doseRate)) &&
-      Number(r.doseRate) >= 0 && Number.isFinite(Number(r.hours)) && Number(r.hours) > 0
-    ).map(r => ({id: String(r.id || makeId()), date: String(r.date || ""), doseRate:Number(r.doseRate), unit:r.unit === "uSv" ? "uSv" : "mSv", hours:Number(r.hours), dose:Number(r.dose), location:String(r.location || ""), notes:String(r.notes || "")})) : [];
-  } catch { records = []; }
-
-  function makeId() { return (Date.now().toString(36) + Math.random().toString(36).slice(2,9)); }
-  function localDate() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
-  function escapeHtml(value) { return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-  function fmt(n) { return Number(n).toLocaleString("ru-RU",{maximumFractionDigits:6}); }
-  function calcDose(rate, unit, hours) { return rate * hours * (unit === "uSv" ? 0.001 : 1); }
-  function persist() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch { alert("Не удалось сохранить данные в браузере. Экспортируйте резервную копию и проверьте свободное место."); } }
-  function resetForm() { editingId=null; $("recordForm").reset(); $("date").value=localDate(); $("unit").value="mSv"; $("formTitle").textContent="＋ Добавить измерение"; $("submitBtn").textContent="Сохранить запись"; $("cancelEdit").hidden=true; }
-  $("date").value=localDate();
-
-  $("recordForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const rate = Number($("doseRate").value), hours = Number($("hours").value), unit=$("unit").value;
-    if ($("doseRate").value.trim()==="" || !Number.isFinite(rate) || rate < 0) { alert("Введите корректную неотрицательную мощность дозы."); $("doseRate").focus(); return; }
-    if ($("hours").value.trim()==="" || !Number.isFinite(hours) || hours <= 0) { alert("Продолжительность должна быть больше нуля."); $("hours").focus(); return; }
-    const dose=calcDose(rate,unit,hours);
-    if (!Number.isFinite(dose)) { alert("Результат расчёта вне допустимого диапазона."); return; }
-    const entry={id:editingId || makeId(), date:$("date").value || localDate(), doseRate:rate, unit, hours, dose, location:$("location").value.trim() || "Место не указано", notes:$("notes").value.trim()};
-    if (editingId) records=records.map(r=>r.id===editingId?entry:r); else records.unshift(entry);
-    persist(); resetForm(); render();
-  });
-  $("cancelEdit").addEventListener("click", resetForm);
-
-  function beginEdit(id) {
-    const r=records.find(x=>x.id===id); if(!r)return;
-    editingId=id; $("doseRate").value=r.doseRate; $("unit").value=r.unit; $("hours").value=r.hours; $("date").value=r.date || localDate(); $("location").value=r.location; $("notes").value=r.notes;
-    $("formTitle").textContent="Редактировать измерение"; $("submitBtn").textContent="Сохранить изменения"; $("cancelEdit").hidden=false;
-    $("doseRate").focus(); window.scrollTo({top:0,behavior:"smooth"});
-  }
-  function removeRecord(id) {
-    const r=records.find(x=>x.id===id); if(!r)return;
-    if(confirm(`Удалить запись «${r.location}» от ${r.date}?`)){records=records.filter(x=>x.id!==id);if(editingId===id)resetForm();persist();render();}
-  }
-  $("recordsList").addEventListener("click",e=>{
-    const b=e.target.closest("button[data-action]");if(!b)return;
-    if(b.dataset.action==="edit")beginEdit(b.dataset.id);
-    if(b.dataset.action==="delete")removeRecord(b.dataset.id);
-  });
-  $("search").addEventListener("input",render);
-  $("clearAll").addEventListener("click",()=>{if(records.length && confirm("Удалить все записи из этого браузера? Сначала можно скачать резервную копию.")){records=[];persist();resetForm();render();}});
-  function download(filename, content, type) {
-    const blob=new Blob(["\ufeff",content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-  }
-  function csvCell(v) { const s=String(v ?? ""); return `"${s.replace(/"/g,'""')}"`; }
-  $("exportCsv").addEventListener("click",()=>{
-    const rows=[["Дата","Место","Мощность дозы","Единица","Время, ч","Расчётная доза, мЗв","Примечания"],...records.map(r=>[r.date,r.location,r.doseRate,r.unit==="uSv"?"мкЗв/ч":"мЗв/ч",r.hours,r.dose,r.notes])];
-    download("radiation-dose-records.csv",rows.map(row=>row.map(csvCell).join(";")).join("\r\n"),"text/csv;charset=utf-8");
-  });
-  $("exportJson").addEventListener("click",()=>download("radiation-dose-backup.json",JSON.stringify({exportedAt:new Date().toISOString(),records},null,2),"application/json;charset=utf-8"));
-
-  function render() {
-    const query=$("search").value.trim().toLocaleLowerCase("ru");
-    const filtered=records.filter(r=>(r.location+" "+r.notes+" "+r.date).toLocaleLowerCase("ru").includes(query));
-    const total=records.reduce((s,r)=>s+r.dose,0);
-    $("totalDose").textContent=fmt(total); $("recordCount").textContent=String(records.length); $("visibleCount").textContent=`${filtered.length} из ${records.length}`;
-    if(!filtered.length){$("recordsList").innerHTML=`<div class="empty">${records.length?"По запросу ничего не найдено.":"Пока нет записей. Добавьте первое измерение выше."}</div>`;}
-    else {$("recordsList").innerHTML=filtered.map(r=>`<article class="record"><div><div class="record-title">${escapeHtml(r.location)}</div><div class="record-meta">${escapeHtml(r.date)} · ${fmt(r.doseRate)} ${r.unit==="uSv"?"мкЗв/ч":"мЗв/ч"} × ${fmt(r.hours)} ч${r.notes?" · "+escapeHtml(r.notes):""}</div></div><div class="record-dose">${fmt(r.dose)} мЗв</div><div class="record-actions"><button class="btn secondary" data-action="edit" data-id="${escapeHtml(r.id)}">Изменить</button><button class="btn danger" data-action="delete" data-id="${escapeHtml(r.id)}">Удалить</button></div></article>`).join("");}
-    drawChart();
-  }
-  function drawChart() {
-    const canvas=$("doseChart"), rect=canvas.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
-    if(!rect.width || !rect.height)return;
-    canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
-    const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);
-    const w=rect.width,h=rect.height,p={l:43,r:12,t:15,b:34},cw=w-p.l-p.r,ch=h-p.t-p.b;
-    ctx.clearRect(0,0,w,h);
-    const vals=records.slice().reverse().slice(-12).map(r=>r.dose);
-    ctx.font="11px system-ui";ctx.lineWidth=1;ctx.strokeStyle="#2a3d53";ctx.fillStyle="#a6b7c9";
-    for(let i=0;i<=4;i++){const y=p.t+ch*i/4;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(w-p.r,y);ctx.stroke();const max=Math.max(1,...vals);ctx.fillText(fmt(max*(1-i/4)),2,y+4);}
-    if(!vals.length){ctx.fillStyle="#a6b7c9";ctx.textAlign="center";ctx.font="13px system-ui";ctx.fillText("Добавьте измерения, чтобы построить график",w/2,h/2);return;}
-    const max=Math.max(...vals,1);
-    const step=cw/vals.length,barW=Math.max(5,step*.56);
-    vals.forEach((v,i)=>{const bh=(v/max)*(ch*.88);const x=p.l+i*step+(step-barW)/2,y=p.t+ch-bh;ctx.fillStyle="#55d6c2";ctx.beginPath();ctx.roundRect(x,y,barW,bh,4);ctx.fill();});
-    ctx.fillStyle="#a6b7c9";ctx.textAlign="center";ctx.fillText("Последние "+vals.length+" записей",p.l+cw/2,h-7);
-  }
-  window.addEventListener("resize",drawChart);
-  render();
-})();
-</script>
+    <script>
+        // ============================================
+        // RADIATION DOSE TRACKER — JavaScript
+        // Author: Mikheil Jorbenadze, PhD
+        // GPT-4 — AI Assistant
+        // ============================================
+        
+        let records = JSON.parse(localStorage.getItem('doseRecords') || '[]');
+        
+        function addRecord() {
+            const doseRate = parseFloat(document.getElementById('doseRate').value);
+            const hours = parseFloat(document.getElementById('hours').value);
+            const location = document.getElementById('location').value || 'Not specified';
+            
+            if (isNaN(doseRate) || isNaN(hours)) {
+                alert('Please enter valid numbers');
+                return;
+            }
+            
+            const dose = doseRate * hours;
+            
+            records.push({
+                date: new Date().toISOString().slice(0, 10),
+                doseRate: doseRate,
+                hours: hours,
+                dose: dose,
+                location: location
+            });
+            
+            saveRecords();
+            render();
+            
+            document.getElementById('doseRate').value = '';
+            document.getElementById('hours').value = '';
+            document.getElementById('location').value = '';
+        }
+        
+        function saveRecords() {
+            localStorage.setItem('doseRecords', JSON.stringify(records));
+        }
+        
+        function clearAll() {
+            if (confirm('Clear all records?')) {
+                records = [];
+                saveRecords();
+                render();
+            }
+        }
+        
+        function render() {
+            const recordsList = document.getElementById('recordsList');
+            
+            if (records.length === 0) {
+                recordsList.innerHTML = '<p style="color: #666;">No records</p>';
+                document.getElementById('totalDose').textContent = '0';
+                renderLimits(0);
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            records.forEach(r => {
+                total += r.dose;
+                html += `
+                    <div class="record">
+                        <span>${r.date} — ${r.location}</span>
+                        <span class="dose">${r.dose.toFixed(2)} mSv</span>
+                    </div>
+                `;
+            });
+            
+            recordsList.innerHTML = html;
+            document.getElementById('totalDose').textContent = total.toFixed(2);
+            renderLimits(total);
+        }
+        
+        function renderLimits(total) {
+            const limits = [
+                { name: 'ICRP (20 mSv)', value: 20 },
+                { name: 'US NRC (50 mSv)', value: 50 },
+                { name: 'Lens US (150 mSv)', value: 150 },
+                { name: 'Lens ICRP (20 mSv)', value: 20 }
+            ];
+            
+            let html = '';
+            limits.forEach(l => {
+                const percent = ((total / l.value) * 100).toFixed(1);
+                const status = total < l.value ? 'ok' : 'exceeded';
+                const symbol = total < l.value ? '✅' : '❌';
+                
+                html += `
+                    <div class="limit-row">
+                        <span>${l.name}</span>
+                        <span class="${status}">${total.toFixed(2)}/${l.value} mSv (${percent}%) ${symbol}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('limitsList').innerHTML = html;
+        }
+        
+        // Initialize
+        render();
+    </script>
 </body>
 </html>
